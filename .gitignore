@@ -1,5 +1,5 @@
 .vscode
-*.pdf
+# *.pdf
 *.csv
 .DS_Store
 *~
