@@ -24,4 +24,7 @@ sns.set(style="darkgrid", rc={'text.usetex': False,
 # Creation du graphe :
 fig = easyPlotDataFrame(df=df, args=args)
 
+for ax in fig.axes.flat:
+    ax.set_xticks(sorted(df[args.x].unique()))
+
 savePlot(fig)

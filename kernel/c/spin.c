@@ -4,6 +4,14 @@
 #include <math.h>
 #include <omp.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#ifndef M_PI_2
+#define M_PI_2 1.57079632679489661923
+#endif
+
 static void rotate (void);
 static unsigned compute_color (int i, int j);
 
@@ -47,6 +55,7 @@ unsigned spin_compute_seq (unsigned nb_iter)
 
     for (int i = 0; i < DIM; i++)
       for (int j = 0; j < DIM; j++)
+        // if (i < DIM/2 || j < DIM/2)
         cur_img (i, j) = compute_color (i, j);
 
     rotate (); // Slightly increase the base angle
@@ -73,6 +82,41 @@ unsigned spin_compute_tiled (unsigned nb_iter)
 {
   for (unsigned it = 1; it <= nb_iter; it++) {
 
+    for (int y = 0; y < DIM; y += TILE_H)
+      for (int x = 0; x < DIM; x += TILE_W)
+        // if ((x / TILE_W + y / TILE_H) % 2)
+        do_tile (x, y, TILE_W, TILE_H);
+
+    rotate ();
+  }
+
+  return 0;
+}
+
+///////////////////////////// Rows tiled parallel version (omp)
+//
+unsigned spin_compute_omp (unsigned nb_iter)
+{
+  for (unsigned it = 1; it <= nb_iter; it++) {
+
+#pragma omp parallel for schedule(runtime)
+    for (int y = 0; y < DIM; y += TILE_H)
+      for (int x = 0; x < DIM; x += TILE_W)
+        do_tile (x, y, TILE_W, TILE_H);
+
+    rotate ();
+  }
+
+  return 0;
+}
+
+///////////////////////////// Tiled parallel version (omp_tiled)
+//
+unsigned spin_compute_omp_tiled (unsigned nb_iter)
+{
+  for (unsigned it = 1; it <= nb_iter; it++) {
+
+#pragma omp parallel for collapse(2) schedule(runtime)
     for (int y = 0; y < DIM; y += TILE_H)
       for (int x = 0; x < DIM; x += TILE_W)
         do_tile (x, y, TILE_W, TILE_H);

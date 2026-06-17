@@ -68,3 +68,6 @@ def execute(commande, ompenv, option, nbruns=1, verbose=True, filter=lambda x: T
     if (verbose):
         print("Experiences done")
     os.chdir(path)
+
+def execute_simple(cmd):
+    subprocess.run(cmd, shell=True, check=True)
